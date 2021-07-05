@@ -9,4 +9,4 @@ try:
     bot.run(token)
 except discord.LoginFailure:
     print('Login failed. Is the token valid?')
-    input()  # Pause
+    input()  # Pause before exiting
