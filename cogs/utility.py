@@ -12,11 +12,12 @@ class Utility(commands.Cog):
         print(f'{self.bot.user} ready')
 
     @commands.command()
+    @commands.has_permissions(manage_guild=True)  # To remove public use
     async def ping(self, ctx):
-        start_time = time.monotonic()
-        sent_message = await ctx.send('Pong!')
+        start_time = time.monotonic()  # Start monotonic clock
+        sent_message = await ctx.send('Pong!')  # Send message
         time_difference = time.monotonic() - start_time
-        await sent_message.edit(content='Pong! {:.0f} ms'.format(time_difference * 1000))
+        await sent_message.edit(content='Pong! {:.0f} ms'.format(time_difference * 1000))  # Edit time diff in as ms
 
 
 def setup(bot):
