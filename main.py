@@ -7,6 +7,14 @@ import console_interaction
 bot = commands.Bot(command_prefix='.')
 
 
+@bot.check
+async def globally_block_dms(ctx):
+    if ctx.guild is None:
+        raise commands.NoPrivateMessage
+    else:
+        return True
+
+
 @bot.command()
 @commands.is_owner()  # Owner-only command
 async def load(ctx, extension):
