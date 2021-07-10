@@ -4,7 +4,9 @@ import os
 import console_interaction
 
 
-bot = commands.Bot(command_prefix='.')
+intents = discord.Intents.default()
+intents.members = True
+bot = commands.Bot(command_prefix='.', intents=intents)
 
 
 @bot.check
