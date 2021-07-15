@@ -17,6 +17,14 @@ async def globally_block_dms(ctx):
         return True
 
 
+@bot.check
+async def require_manage_guild(ctx):  # All commands require Manage Server permission
+    if not ctx.author.guild_permissions.manage_guild:
+        raise commands.MissingPermissions(['manage_guild'])
+    else:
+        return True
+
+
 @bot.command()
 @commands.is_owner()  # Owner-only command
 async def load(ctx, extension):

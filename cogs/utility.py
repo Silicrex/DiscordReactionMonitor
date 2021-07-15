@@ -19,7 +19,7 @@ class Utility(commands.Cog):
             print(f'Attempted DM use by {ctx.author}: {error.args[0]}')
         elif isinstance(error, commands.MissingPermissions):
             print(f'{ctx.author} does not have permission:\n'
-                  f'Permission: {error.args}\n'
+                  f'Permission: {error.args[0]}\n'
                   f'Message: {ctx.message.content}')
         elif isinstance(error, commands.ChannelNotFound):
             embed = discord.Embed(
@@ -46,7 +46,6 @@ class Utility(commands.Cog):
             raise error
 
     @commands.command()
-    @commands.has_permissions(manage_guild=True)  # To remove public use
     async def ping(self, ctx):
         start_time = time.monotonic()  # Start monotonic clock
         sent_message = await ctx.send('Pong!')  # Send message
