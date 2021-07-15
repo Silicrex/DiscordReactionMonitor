@@ -43,7 +43,7 @@ class Reactions(commands.Cog):
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
         if not config_data['add_reaction_log_enabled']:
-            print('Reaction add log has been disabled, ignoring event')
+            # print('Reaction add log has been disabled, ignoring event')
             return
         add_log_channel = self.bot.get_channel(config_data['add_reaction_log_id'])
         if not add_log_channel:
@@ -59,7 +59,7 @@ class Reactions(commands.Cog):
         server = self.bot.get_guild(payload.guild_id)
         user = server.get_member(payload.user_id)
         if user.id in config_data['ignored_users']:
-            print(f'{user} is blacklisted, ignoring added reaction')
+            # print(f'{user} is blacklisted, ignoring added reaction')
             return
         message_link = f'https://discord.com/channels/{payload.guild_id}/{payload.channel_id}/{payload.message_id}'
         emoji = payload.emoji
@@ -88,7 +88,7 @@ class Reactions(commands.Cog):
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload):
         if not config_data['remove_reaction_log_enabled']:
-            print('Reaction remove log has been disabled, ignoring event')
+            # print('Reaction remove log has been disabled, ignoring event')
             return
         remove_log_channel = self.bot.get_channel(config_data['remove_reaction_log_id'])
         if not remove_log_channel:
@@ -104,7 +104,7 @@ class Reactions(commands.Cog):
         server = self.bot.get_guild(payload.guild_id)
         user = server.get_member(payload.user_id)
         if user.id in config_data['ignored_users']:
-            print(f'{user} is blacklisted, ignoring removed reaction')
+            # print(f'{user} is blacklisted, ignoring removed reaction')
             return
         message_link = f'https://discord.com/channels/{payload.guild_id}/{payload.channel_id}/{payload.message_id}'
         emoji = payload.emoji
