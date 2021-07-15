@@ -36,6 +36,11 @@ with open('config.json') as config_json:  # Load data from config
         quit()
 
 
+def save():  # Save to file
+    with open('config.json', 'w') as file:
+        json.dump(config_data, file, indent=4)
+
+
 class Reactions(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -160,8 +165,7 @@ class Reactions(commands.Cog):
             await ctx.send(embed=embed)
             return
         config_data['add_reaction_log_id'] = channel.id
-        with open('config.json', 'w') as file:  # Save to file
-            json.dump(config_data, file, indent=4)
+        save()  # Save changes to file
         embed = discord.Embed(
             description=f'Successfully set add log to {channel.mention}',
             color=0x60FF7D
@@ -179,8 +183,7 @@ class Reactions(commands.Cog):
             await ctx.send(embed=embed)
             return
         config_data['add_reaction_log_enabled'] = True
-        with open('config.json', 'w') as file:  # Save to file
-            json.dump(config_data, file, indent=4)
+        save()  # Save changes to file
         embed = discord.Embed(
             description='**Enabled** add log',
             color=0x60FF7D
@@ -198,8 +201,7 @@ class Reactions(commands.Cog):
             await ctx.send(embed=embed)
             return
         config_data['add_reaction_log_enabled'] = False
-        with open('config.json', 'w') as file:  # Save to file
-            json.dump(config_data, file, indent=4)
+        save()  # Save changes to file
         embed = discord.Embed(
             description='**Disabled** add log',
             color=0xFF5959
@@ -217,8 +219,7 @@ class Reactions(commands.Cog):
             await ctx.send(embed=embed)
             return
         config_data['add_reaction_log_id'] = None
-        with open('config.json', 'w') as file:  # Save to file
-            json.dump(config_data, file, indent=4)
+        save()  # Save changes to file
         embed = discord.Embed(
             description='**Unset add log**',
             color=0xFF5959
@@ -255,8 +256,7 @@ class Reactions(commands.Cog):
             await ctx.send(embed=embed)
             return
         config_data['remove_reaction_log_id'] = channel.id
-        with open('config.json', 'w') as file:  # Save to file
-            json.dump(config_data, file, indent=4)
+        save()  # Save changes to file
         embed = discord.Embed(
             description=f'Successfully set remove log to {channel.mention}',
             color=0x60FF7D
@@ -274,8 +274,7 @@ class Reactions(commands.Cog):
             await ctx.send(embed=embed)
             return
         config_data['remove_reaction_log_enabled'] = True
-        with open('config.json', 'w') as file:  # Save to file
-            json.dump(config_data, file, indent=4)
+        save()  # Save changes to file
         embed = discord.Embed(
             description='**Enabled** remove log',
             color=0x60FF7D
@@ -293,8 +292,7 @@ class Reactions(commands.Cog):
             await ctx.send(embed=embed)
             return
         config_data['remove_reaction_log_enabled'] = False
-        with open('config.json', 'w') as file:  # Save to file
-            json.dump(config_data, file, indent=4)
+        save()  # Save changes to file
         embed = discord.Embed(
             description='**Disabled** remove log',
             color=0xFF5959
@@ -312,8 +310,7 @@ class Reactions(commands.Cog):
             await ctx.send(embed=embed)
             return
         config_data['remove_reaction_log_id'] = None
-        with open('config.json', 'w') as file:  # Save to file
-            json.dump(config_data, file, indent=4)
+        save()  # Save changes to file
         embed = discord.Embed(
             description='**Unset remove log**',
             color=0xFF5959
@@ -370,8 +367,7 @@ class Reactions(commands.Cog):
             return
         config_data['ignored_users'].append(user.id)
         config_data['ignored_users'] = sorted(config_data['ignored_users'])  # Sort by uid
-        with open('config.json', 'w') as file:  # Save to file
-            json.dump(config_data, file, indent=4)
+        save()  # Save changes to file
         embed = discord.Embed(
             description=f'Blacklisted **{user.name}**',
             color=0x60FF7D
@@ -388,8 +384,7 @@ class Reactions(commands.Cog):
             await ctx.send(embed=embed)
             return
         config_data['ignored_users'].remove(user.id)
-        with open('config.json', 'w') as file:  # Save to file
-            json.dump(config_data, file, indent=4)
+        save()  # Save changes to file
         embed = discord.Embed(
             description=f'Removed **{user.name}** from blacklist',
             color=0xFF5959
@@ -426,8 +421,7 @@ class Reactions(commands.Cog):
             await ctx.send(embed=embed)
             return
         config_data['ignored_users'].clear()
-        with open('config.json', 'w') as file:  # Save to file
-            json.dump(config_data, file, indent=4)
+        save()  # Save changes to file
         embed = discord.Embed(
             description=f'Cleared blacklist',
             color=0xFF5959
