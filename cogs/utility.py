@@ -21,6 +21,18 @@ class Utility(commands.Cog):
             print(f'{ctx.author} does not have permission:\n'
                   f'Permission: {error.args}\n'
                   f'Message: {ctx.message.content}')
+        elif isinstance(error, commands.ChannelNotFound):
+            embed = discord.Embed(
+                title='Invalid channel',
+                color=0xFFE900
+            )
+            await ctx.send(embed=embed)
+        elif isinstance(error, commands.MemberNotFound):
+            embed = discord.Embed(
+                title='Invalid user',
+                color=0xFFE900
+            )
+            await ctx.send(embed=embed)
         else:
             print('- [Error]')
             print('Class:', error.__class__)
@@ -34,7 +46,7 @@ class Utility(commands.Cog):
             raise error
 
     @commands.command()
-    # @commands.has_permissions(manage_guild=True)  # To remove public use
+    @commands.has_permissions(manage_guild=True)  # To remove public use
     async def ping(self, ctx):
         start_time = time.monotonic()  # Start monotonic clock
         sent_message = await ctx.send('Pong!')  # Send message
