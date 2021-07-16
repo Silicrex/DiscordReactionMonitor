@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-import time
+import time  # For ping command
 
 
 class Utility(commands.Cog):
@@ -60,10 +60,9 @@ class Utility(commands.Cog):
         embed.add_field(name='addlog', value='add, a', inline=False)
         embed.add_field(name='removelog', value='remove, r', inline=False)
         embed.add_field(name='status', value='s', inline=False)
-        embed.add_field(name='blacklist', value='bl, b'
-                                                '\n\nSubcommands\n'
-                                                'list: l\n'
-                                                'listid: id', inline=False)
+        embed.add_field(name='blacklist', value='bl, b', inline=False)
+        embed.add_field(name='blacklist list', value='blacklist l', inline=False)
+        embed.add_field(name='blacklist listid', value='blacklist id', inline=False)
         await ctx.send(embed=embed)
 
 

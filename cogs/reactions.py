@@ -1,9 +1,9 @@
 import discord
 from discord.ext import commands
-import os
-import json
+import os  # To check if config.json exists already
+import json  # For config.json
 import aiohttp  # API doesn't properly work with the removal of animated emojis
-# Will not be able to discern whether to display an emoji as a png or gif, so use web request to check
+# Will not be able to discern whether to display a removed reaction emoji as a png or gif, so use web request to check
 
 # Embed color palette:
 #
