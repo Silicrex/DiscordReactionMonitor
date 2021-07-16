@@ -58,7 +58,7 @@ class Reactions(commands.Cog):
                       ">>> If done manually; replace 'None' with the channel id, "
                       "and make sure you leave the comma after")
             else:
-                print('ERROR: Invalid reaction add channel id')
+                print('ERROR: Invalid add log channel id')
             return
 
         server = self.bot.get_guild(payload.guild_id)
@@ -76,13 +76,7 @@ class Reactions(commands.Cog):
         )
 
         if emoji.is_custom_emoji():
-            emoji_url = str(emoji.url)[:-3] + 'gif'
-            async with aiohttp.ClientSession() as session:
-                async with session.get(emoji_url) as request:
-                    if request.status == 200:
-                        embed.set_thumbnail(url=emoji_url)
-                    else:
-                        embed.set_thumbnail(url=emoji.url)
+            embed.set_thumbnail(url=emoji.url)
 
         embed.set_author(name=f'{user.name}#{user.discriminator}', icon_url=user.avatar_url)
         embed.add_field(name=f'By', value=f'{user.mention}')
