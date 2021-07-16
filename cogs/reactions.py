@@ -135,7 +135,7 @@ class Reactions(commands.Cog):
         embed.add_field(name='Message link', value=f'[Jump to message!]({message_link})', inline=False)
         await remove_log_channel.send(embed=embed)
 
-    @commands.group(invoke_without_command=True)
+    @commands.group(aliases=['a', 'add'], invoke_without_command=True)
     async def addlog(self, ctx):
         status = 'ON' if config_data['add_reaction_log_enabled'] else 'OFF'  # Status string
         log_id = config_data['add_reaction_log_id']
@@ -226,7 +226,7 @@ class Reactions(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-    @commands.group(invoke_without_command=True)
+    @commands.group(aliases=['r', 'remove'], invoke_without_command=True)
     async def removelog(self, ctx):
         status = 'ON' if config_data['remove_reaction_log_enabled'] else 'OFF'  # Status string
         log_id = config_data['remove_reaction_log_id']
@@ -317,7 +317,7 @@ class Reactions(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-    @commands.command()
+    @commands.command(aliases=['s'])
     async def status(self, ctx):
         addlog_status = 'ON' if config_data['add_reaction_log_enabled'] else 'OFF'  # Status string
         removelog_status = 'ON' if config_data['remove_reaction_log_enabled'] else 'OFF'  # Status string
@@ -345,7 +345,7 @@ class Reactions(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-    @commands.group(aliases=['bl'], invoke_without_command=True)
+    @commands.group(aliases=['bl, b'], invoke_without_command=True)
     async def blacklist(self, ctx):
         embed = discord.Embed(
             description='**Usage:**\n'
@@ -391,7 +391,7 @@ class Reactions(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-    @blacklist.command(name='list')
+    @blacklist.command(name='list', aliases=['l'])
     async def blacklist_list(self, ctx):
         ignored_users_mentions = [f'<@{x}>' for x in config_data['ignored_users']]
         title = 'Blacklisted Users' if ignored_users_mentions else 'There are no blacklisted users'
@@ -401,7 +401,7 @@ class Reactions(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-    @blacklist.command(name='listid')
+    @blacklist.command(name='listid', aliases=['id'])
     async def blacklist_listid(self, ctx):
         ignored_users_strings = [str(x) for x in config_data['ignored_users']]
         title = 'Blacklisted Users (ID)' if ignored_users_strings else 'There are no blacklisted users'

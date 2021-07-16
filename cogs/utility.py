@@ -52,6 +52,20 @@ class Utility(commands.Cog):
         time_difference = time.monotonic() - start_time
         await sent_message.edit(content='Pong! {:.0f} ms'.format(time_difference * 1000))  # Edit time diff in as ms
 
+    @commands.command()
+    async def alias(self, ctx):
+        embed = discord.Embed(
+            title='Command aliases'
+        )
+        embed.add_field(name='addlog', value='add, a', inline=False)
+        embed.add_field(name='removelog', value='remove, r', inline=False)
+        embed.add_field(name='status', value='s', inline=False)
+        embed.add_field(name='blacklist', value='bl, b'
+                                                '\n\nSubcommands\n'
+                                                'list: l\n'
+                                                'listid: id', inline=False)
+        await ctx.send(embed=embed)
+
 
 def setup(bot):
     bot.add_cog(Utility(bot))
