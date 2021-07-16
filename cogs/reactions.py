@@ -339,7 +339,7 @@ class Reactions(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-    @commands.group(aliases=['bl, b'], invoke_without_command=True)
+    @commands.group(aliases=['bl', 'b'], invoke_without_command=True)
     async def blacklist(self, ctx):
         embed = discord.Embed(
             description='**Usage:**\n'

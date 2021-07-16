@@ -65,6 +65,43 @@ class Utility(commands.Cog):
         embed.add_field(name='blacklist listid', value='blacklist id', inline=False)
         await ctx.send(embed=embed)
 
+    @commands.command()
+    async def help(self, ctx):
+        embed = discord.Embed(
+            title='Bot Commands'
+        )
+        embed.add_field(name='Utility', inline=False, value='**help**\n'
+                                                            '- Displays command info\n'
+                                                            '**alias**\n'
+                                                            '- Displays command aliases\n'
+                                                            '**ping**\n'
+                                                            '- Pong')
+        embed.add_field(name='Reactions', inline=True, value='**status**\n'
+                                                             '- Shows current reaction log settings\n'
+                                                             '**addlog\n'
+                                                             'removelog**\n'
+                                                             '- Shows corresponding log\'s settings\n'
+                                                             '**addlog set <channel id/mention>**\n'
+                                                             '**removelog set <channel id/mention>**\n'
+                                                             '- Sets corresponding log to given channel\n'
+                                                             '**addlog <on/off>**\n'
+                                                             '**removelog <on/off>**\n'
+                                                             '- Turns corresponding log on/off\n'
+                                                             '**addlog clear**\n'
+                                                             '**removelog clear**\n'
+                                                             '- Unsets corresponding log channel')
+        embed.add_field(name='Reactions (cont)', inline=True, value='**blacklist**\n'
+                                                                    '- Shows blacklist help\n'
+                                                                    '**blacklist <add/remove> <user id/mention>**\n'
+                                                                    '- Adds/removes given user to/from ignore list\n'
+                                                                    '**blacklist list**\n'
+                                                                    '- Shows user ignore list in mentions\n'
+                                                                    '**blacklist listid**\n'
+                                                                    '- Shows user ignore list in user IDs\n'
+                                                                    '**blacklist clear**\n'
+                                                                    '- Wipes the blacklist')
+        await ctx.send(embed=embed)
+
 
 def setup(bot):
     bot.add_cog(Utility(bot))
