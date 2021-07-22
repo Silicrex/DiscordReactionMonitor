@@ -148,7 +148,7 @@ class Reactions(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-    @addlog.command(name='set')
+    @addlog.command(name='set', aliases=['s'])
     async def addlog_set(self, ctx, channel: discord.TextChannel):  # Valid channel enforced already
         log_id = config_data['add_reaction_log_id']
         if channel.id == log_id:
@@ -239,7 +239,7 @@ class Reactions(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-    @removelog.command(name='set')
+    @removelog.command(name='set', aliases=['s'])
     async def removelog_set(self, ctx, channel: discord.TextChannel):  # Valid channel enforced already
         log_id = config_data['remove_reaction_log_id']
         if channel.id == log_id:
@@ -350,7 +350,7 @@ class Reactions(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-    @blacklist.command(name='add')
+    @blacklist.command(name='add', aliases=['a'])
     async def blacklist_add(self, ctx, user: discord.Member):
         if user.id in config_data['ignored_users']:
             embed = discord.Embed(
@@ -368,7 +368,7 @@ class Reactions(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-    @blacklist.command(name='remove')
+    @blacklist.command(name='remove', aliases=['r'])
     async def blacklist_remove(self, ctx, user: discord.Member):
         if user.id not in config_data['ignored_users']:
             embed = discord.Embed(
