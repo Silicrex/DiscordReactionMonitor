@@ -35,7 +35,7 @@ class Utility(commands.Cog):
             await ctx.send(embed=embed)
         elif isinstance(error, commands.MissingRequiredArgument):
             msg = ctx.message.content
-            command = msg[1:]  # Remove prefix
+            command = str(self.bot.get_command(msg[1:]))  # Remove prefix, convert aliases to full command
             help_dict = get_help_dict()
             embed = get_help_embed(help_dict, command)
             await ctx.send(embed=embed)
@@ -81,6 +81,7 @@ class Utility(commands.Cog):
             embed = get_general_help_embed()
             await ctx.send(embed=embed)
         else:
+            arg1 = str(self.bot.get_command(arg1))  # Convert aliases to full command
             help_dict = get_help_dict()
             if arg1 in help_dict:
                 embed = get_help_embed(help_dict, arg1)
