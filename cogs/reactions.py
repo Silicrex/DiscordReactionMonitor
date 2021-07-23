@@ -21,6 +21,7 @@ if not os.path.isfile('config.json'):  # If config doesn't exist, create a fresh
             'add_reaction_log_id': None,
             'remove_reaction_log_enabled': True,
             'remove_reaction_log_id': None,
+            'blacklist_enabled': True,
             'ignored_users': []  # Using list instead of set due to JSON serialization. Could make custom encoding
             # for theoretical better performance
         }
@@ -63,9 +64,10 @@ class Reactions(commands.Cog):
 
         server = self.bot.get_guild(payload.guild_id)
         user = server.get_member(payload.user_id)
-        if user.id in config_data['ignored_users']:
-            # print(f'{user} is blacklisted, ignoring added reaction')
-            return
+        if config_data['blacklist_enabled']:
+            if user.id in config_data['ignored_users']:
+                # print(f'{user} is blacklisted, ignoring added reaction')
+                return
         message_link = f'https://discord.com/channels/{payload.guild_id}/{payload.channel_id}/{payload.message_id}'
         emoji = payload.emoji
 
@@ -102,9 +104,10 @@ class Reactions(commands.Cog):
 
         server = self.bot.get_guild(payload.guild_id)
         user = server.get_member(payload.user_id)
-        if user.id in config_data['ignored_users']:
-            # print(f'{user} is blacklisted, ignoring removed reaction')
-            return
+        if config_data['blacklist_enabled']:
+            if user.id in config_data['ignored_users']:
+                # print(f'{user} is blacklisted, ignoring added reaction')
+                return
         message_link = f'https://discord.com/channels/{payload.guild_id}/{payload.channel_id}/{payload.message_id}'
         emoji = payload.emoji
 
@@ -313,22 +316,27 @@ class Reactions(commands.Cog):
 
     @commands.command(aliases=['s'])
     async def status(self, ctx):
+        # Get add log statuses
         addlog_status = 'ON' if config_data['add_reaction_log_enabled'] else 'OFF'  # Status string
-        removelog_status = 'ON' if config_data['remove_reaction_log_enabled'] else 'OFF'  # Status string
         addlog_id = config_data['add_reaction_log_id']
-        removelog_id = config_data['remove_reaction_log_id']
-
         if addlog_id is None:  # Not set yet
             addlog_channel_text = '**Not set**'
         else:
             addlog_channel = self.bot.get_channel(addlog_id)
             addlog_channel_text = f'<#{addlog_id}>' if addlog_channel else '**(Invalid channel)**'
 
+        # Get remove log statuses
+        removelog_status = 'ON' if config_data['remove_reaction_log_enabled'] else 'OFF'  # Status string
+        removelog_id = config_data['remove_reaction_log_id']
         if removelog_id is None:  # Not set yet
             removelog_channel_text = '**Not set**'
         else:
             removelog_channel = self.bot.get_channel(removelog_id)
             removelog_channel_text = f'<#{removelog_id}>' if removelog_channel else '**(Invalid channel)**'
+
+        # Get blacklist statuses
+        blacklist_status = 'ON' if config_data['blacklist_enabled'] else 'OFF'  # Status string
+        blacklist_length = len(config_data['ignored_users'])
 
         embed = discord.Embed(
             title='Reaction Log Status',
@@ -336,17 +344,23 @@ class Reactions(commands.Cog):
                         f'Add log channel: {addlog_channel_text}\n\n'
                         f'Remove log: **{removelog_status}**\n'
                         f'Remove log channel: {removelog_channel_text}\n\n'
+                        f'Blacklist: **{blacklist_status}**\n'
+                        f'Blacklisted users: **{blacklist_length}**'
         )
         await ctx.send(embed=embed)
 
     @commands.group(aliases=['bl', 'b'], invoke_without_command=True)
     async def blacklist(self, ctx):
+        status = 'ON' if config_data['blacklist_enabled'] else 'OFF'  # Status string
+        blacklist_length = len(config_data['ignored_users'])
         embed = discord.Embed(
-            description='**Usage:**\n'
-                        '.blacklist add <user id/mention>\n'
-                        '.blacklist remove <user id/mention>\n'
-                        '.blacklist list\n'
-                        '.blacklist listid'
+            description=f'(Blacklist is currently **{status}**)\n'
+                        f'(Blacklisted users: **{blacklist_length}**)\n\n'
+                        f'**Usage:**\n'
+                        f'.blacklist add <user id/mention>\n'
+                        f'.blacklist remove <user id/mention>\n'
+                        f'.blacklist list\n'
+                        f'.blacklist listid'
         )
         await ctx.send(embed=embed)
 
@@ -402,6 +416,42 @@ class Reactions(commands.Cog):
         embed = discord.Embed(
             title=title,
             description='\n'.join(ignored_users_strings)
+        )
+        await ctx.send(embed=embed)
+
+    @blacklist.command(name='on')
+    async def blacklist_on(self, ctx):
+        enabled = config_data['blacklist_enabled']
+        if enabled:  # If it's already on
+            embed = discord.Embed(
+                title='Blacklist is already on',
+                color=0xFFE900
+            )
+            await ctx.send(embed=embed)
+            return
+        config_data['blacklist_enabled'] = True
+        save()  # Save changes to file
+        embed = discord.Embed(
+            description='**Enabled** blacklist',
+            color=0x60FF7D
+        )
+        await ctx.send(embed=embed)
+
+    @blacklist.command(name='off')
+    async def blacklist_off(self, ctx):
+        enabled = config_data['blacklist_enabled']
+        if not enabled:  # If it's already off
+            embed = discord.Embed(
+                title='Blacklist is already off',
+                color=0xFFE900
+            )
+            await ctx.send(embed=embed)
+            return
+        config_data['blacklist_enabled'] = False
+        save()  # Save changes to file
+        embed = discord.Embed(
+            description='**Disabled** blacklist',
+            color=0xFF5959
         )
         await ctx.send(embed=embed)
 

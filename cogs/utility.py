@@ -190,7 +190,7 @@ def get_help_dict(module=None):
                 'title': 'blacklist (add/remove/clear/list/listid)',
                 'description': 'Shows blacklist (reaction log ignore list) help/settings; or manages blacklist',
                 'example': 'blacklist',
-                'alias': []
+                'alias': ['bl', 'b']
             },
     }
     # Subcommands --------------------------------
