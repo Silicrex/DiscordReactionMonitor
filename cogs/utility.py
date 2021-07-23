@@ -75,7 +75,7 @@ class Utility(commands.Cog):
         embed.add_field(name='blacklist listid', value='blacklist id', inline=False)
         await ctx.send(embed=embed)
 
-    @commands.command()
+    @commands.command(aliases=['h'])
     async def help(self, ctx, *, arg1=None):
         if arg1 is None:  # Then print general help
             embed = get_general_help_embed()
