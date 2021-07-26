@@ -24,7 +24,10 @@ if not os.path.isfile('config.json'):  # If config doesn't exist, create a fresh
             'blacklist_enabled': True,
             'ignored_users': [],  # Using list instead of set due to JSON serialization. Could make custom encoding
             # for theoretical better performance
-            'ignored_roles': []
+            'ignored_roles': [],
+            'stat_tracking_enabled': True,
+            'reactions_added': 0,
+            'reactions_removed': 0,
         }
         json.dump(template_config, config_json, indent=4)
 
@@ -49,6 +52,9 @@ class Reactions(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
+        if config_data['stat_tracking_enabled']:
+            config_data['reactions_added'] += 1
+            save()
         if not config_data['add_reaction_log_enabled']:
             # print('Reaction add log has been disabled, ignoring event')
             return
@@ -94,6 +100,9 @@ class Reactions(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload):
+        if config_data['stat_tracking_enabled']:
+            config_data['reactions_removed'] += 1
+            save()
         if not config_data['remove_reaction_log_enabled']:
             # print('Reaction remove log has been disabled, ignoring event')
             return
@@ -595,6 +604,57 @@ class Reactions(commands.Cog):
             save()
         embed = discord.Embed(
             description=f'Cleared blacklists',
+            color=0xFF5959
+        )
+        await ctx.send(embed=embed)
+
+    @commands.group(invoke_without_command=True)
+    async def stats(self, ctx):
+        status = 'ON' if config_data['stat_tracking_enabled'] else 'OFF'  # Status string
+        reactions_added = config_data['reactions_added']
+        reactions_removed = config_data['reactions_removed']
+        embed = discord.Embed(
+            description=f'(Stat tracking is currently **{status}**)\n'
+                        f'(Reactions added: **{reactions_added}**)\n'
+                        f'(Reactions removed: **{reactions_removed}**)\n\n'
+                        f'**Usage:**\n'
+                        f'.stats\n'
+                        f'.stats <on/off>\n'
+        )
+        await ctx.send(embed=embed)
+
+    @stats.command(name='on')
+    async def stats_on(self, ctx):
+        enabled = config_data['stat_tracking_enabled']
+        if enabled:  # If it's already on
+            embed = discord.Embed(
+                title='Stat tracking is already on',
+                color=0xFFE900
+            )
+            await ctx.send(embed=embed)
+            return
+        config_data['stat_tracking_enabled'] = True
+        save()  # Save changes to file
+        embed = discord.Embed(
+            description='**Enabled** stat tracking',
+            color=0x60FF7D
+        )
+        await ctx.send(embed=embed)
+
+    @stats.command(name='off')
+    async def stats_off(self, ctx):
+        enabled = config_data['stat_tracking_enabled']
+        if not enabled:  # If it's already off
+            embed = discord.Embed(
+                title='Stat tracking is already off',
+                color=0xFFE900
+            )
+            await ctx.send(embed=embed)
+            return
+        config_data['stat_tracking_enabled'] = False
+        save()  # Save changes to file
+        embed = discord.Embed(
+            description='**Disabled** stat tracking',
             color=0xFF5959
         )
         await ctx.send(embed=embed)

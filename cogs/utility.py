@@ -206,6 +206,13 @@ def get_help_dict(module=None):
                 'example': 'status',
                 'alias': ['s']
             },
+        'stats':
+            {
+                'title': 'stats (<on/off>)',
+                'description': 'Shows reaction add/remove stats; or toggles stat tracking. Bypasses log toggles',
+                'example': 'stats',
+                'alias': []
+            },
         'addlog':
             {
                 'title': 'addlog (set/on/off/clear)',
@@ -330,6 +337,22 @@ def get_help_dict(module=None):
                 'title': 'blacklist clear <users/roles/all>',
                 'description': 'Clears corresponding reaction log ignore list',
                 'example': 'blacklist clear all',
+                'alias': []
+            },
+    }
+    stats = {
+        'stats on':
+            {
+                'title': 'stats on',
+                'description': 'Enables reaction add/remove stat tracking. Bypasses log toggles',
+                'example': 'stats on',
+                'alias': []
+            },
+        'stats off':
+            {
+                'title': 'stats off',
+                'description': 'Disables reaction add/remove stat tracking. Bypasses log toggles',
+                'example': 'stats off',
                 'alias': []
             },
     }
