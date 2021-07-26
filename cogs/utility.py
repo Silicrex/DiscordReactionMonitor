@@ -1,3 +1,5 @@
+import asyncio
+
 import discord
 from discord.ext import commands
 import time  # For ping command
@@ -68,7 +70,8 @@ class Utility(commands.Cog):
     async def alias(self, ctx):
         embed = discord.Embed(
             title='Command aliases',
-            description='**\\> = subcommand level**'
+            description="**\\> = subcommand level**\n"
+                        "**'yes'/'y', 'no'/'n' interchangeable**"
         )
         embed.add_field(name='help', inline=True, value='- h')
         embed.add_field(name='addlog', inline=True, value='- add\n'
@@ -208,8 +211,8 @@ def get_help_dict(module=None):
             },
         'stats':
             {
-                'title': 'stats (<on/off>)',
-                'description': 'Shows reaction add/remove stats; or toggles stat tracking. Bypasses log toggles',
+                'title': 'stats (on/off/clear)',
+                'description': 'Shows reaction add/remove stats; or manages stat tracking. Bypasses log toggles',
                 'example': 'stats',
                 'alias': []
             },
@@ -353,6 +356,14 @@ def get_help_dict(module=None):
                 'title': 'stats off',
                 'description': 'Disables reaction add/remove stat tracking. Bypasses log toggles',
                 'example': 'stats off',
+                'alias': []
+            },
+        'stats clear':
+            {
+                'title': 'stats clear',
+                'description': 'Resets tracked stats on total reactions added/removed (has timed confirmation prompt; '
+                               'resets from time of confirmation)',
+                'example': 'stats clear',
                 'alias': []
             },
     }

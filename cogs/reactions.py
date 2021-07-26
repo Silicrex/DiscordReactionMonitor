@@ -1,8 +1,11 @@
+import asyncio
+
 import discord
 from discord.ext import commands
 import os  # To check if config.json exists already
 import json  # For config.json
 import aiohttp  # API doesn't properly work with the removal of animated emojis
+
 # Will not be able to discern whether to display a removed reaction emoji as a png or gif, so use web request to check
 
 # Embed color palette:
@@ -30,7 +33,6 @@ if not os.path.isfile('config.json'):  # If config doesn't exist, create a fresh
             'reactions_removed': 0,
         }
         json.dump(template_config, config_json, indent=4)
-
 
 with open('config.json') as config_json:  # Load data from config
     try:
@@ -359,6 +361,9 @@ class Reactions(commands.Cog):
         blacklisted_users_length = len(config_data['ignored_users'])
         blacklisted_roles_length = len(config_data['ignored_roles'])
 
+        # Get stats statuses
+        stats_status = 'ON' if config_data['stat_tracking_enabled'] else 'OFF'  # Status string
+
         embed = discord.Embed(
             title='Reaction Log Status',
             description=f'Add log: **{addlog_status}**\n'
@@ -367,7 +372,8 @@ class Reactions(commands.Cog):
                         f'Remove log channel: {removelog_channel_text}\n\n'
                         f'Blacklist: **{blacklist_status}**\n'
                         f'Blacklisted users: **{blacklisted_users_length}**\n'
-                        f'Blacklisted roles: **{blacklisted_roles_length}**\n'
+                        f'Blacklisted roles: **{blacklisted_roles_length}**\n\n'
+                        f'Total reactions stats tracking: **{stats_status}**'
         )
         await ctx.send(embed=embed)
 
@@ -620,6 +626,7 @@ class Reactions(commands.Cog):
                         f'**Usage:**\n'
                         f'.stats\n'
                         f'.stats <on/off>\n'
+                        f'.stats clear'
         )
         await ctx.send(embed=embed)
 
@@ -659,6 +666,54 @@ class Reactions(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-        
+    @stats.command(name='clear')
+    async def stats_clear(self, ctx):
+        embed = discord.Embed(
+            description=f"Reactions added: **{config_data['reactions_added']}**\n"
+                        f"Reactions removed: **{config_data['reactions_removed']}**\n\n"
+                        f"**WARNING: this will reset tracked total reactions stats**\n"
+                        f"**Continue? (y/n)**",
+            color=0x60FF7D
+        )
+        await ctx.send(embed=embed)
+
+        def check(message):  # Takes message from on_message event. Event specified below (doesn't need the 'on_' part)
+            return message.author == ctx.author
+
+        # wait_for returns first event that satisfies check (message event in this case)
+        try:
+            response_message = await self.bot.wait_for('message', timeout=10, check=check)
+        except asyncio.TimeoutError:
+            embed = discord.Embed(
+                title='Prompt timed out! (10s)',
+                color=0xFFE900
+            )
+            await ctx.send(embed=embed)
+            return
+
+        content = response_message.content.lower()  # Lowercase for comparisons
+        if content in {'yes', 'y'}:
+            config_data['reactions_added'] = 0
+            config_data['reactions_removed'] = 0
+            save()
+            embed = discord.Embed(
+                description='**Reset total reactions stats**',
+                color=0xFF5959
+            )
+            await ctx.send(embed=embed)
+        elif content in {'no', 'n'}:
+            embed = discord.Embed(
+                title='**Cancelled**',
+                color=0xFFE900
+            )
+            await ctx.send(embed=embed)
+        else:
+            embed = discord.Embed(
+                title='Invalid response. Cancelling',
+                color=0xFFE900
+            )
+            await ctx.send(embed=embed)
+
+
 def setup(bot):
     bot.add_cog(Reactions(bot))
