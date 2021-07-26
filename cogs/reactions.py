@@ -452,12 +452,11 @@ class Reactions(commands.Cog):
 
     @blacklist.group(name='list', aliases=['l'], invoke_without_command=True)
     async def blacklist_list(self, ctx):
-        embed = discord.Embed(
+        embed = discord.Embed(  # This code is only reached if no valid subcommand was given
             description=f'**Valid lists:** users, userid, roles, roleid',
             color=0xFFE900
         )
         await ctx.send(embed=embed)
-        return
 
     @blacklist_list.command(name='users', aliases=['user', 'u'])
     async def blacklist_list_users(self, ctx):
@@ -535,11 +534,19 @@ class Reactions(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-    @blacklist.command(name='clear')
+    @blacklist.group(name='clear', invoke_without_command=True)
     async def blacklist_clear(self, ctx):
+        embed = discord.Embed(  # This code is only reached if no valid subcommand was given
+            description=f'**Valid arguments:** users, roles, all',
+            color=0xFFE900
+        )
+        await ctx.send(embed=embed)
+
+    @blacklist_clear.command(name='users', aliases=['user', 'u'])
+    async def blacklist_clear_users(self, ctx):
         if not config_data['ignored_users']:  # It's already empty
             embed = discord.Embed(
-                description='Blacklist is already empty',
+                description='User blacklist is already empty',
                 color=0xFFE900
             )
             await ctx.send(embed=embed)
@@ -547,7 +554,47 @@ class Reactions(commands.Cog):
         config_data['ignored_users'].clear()
         save()  # Save changes to file
         embed = discord.Embed(
-            description=f'Cleared blacklist',
+            description=f'Cleared user blacklist',
+            color=0xFF5959
+        )
+        await ctx.send(embed=embed)
+
+    @blacklist_clear.command(name='roles', aliases=['role', 'r'])
+    async def blacklist_clear_roles(self, ctx):
+        if not config_data['ignored_roles']:  # It's already empty
+            embed = discord.Embed(
+                description='Role blacklist is already empty',
+                color=0xFFE900
+            )
+            await ctx.send(embed=embed)
+            return
+        config_data['ignored_roles'].clear()
+        save()  # Save changes to file
+        embed = discord.Embed(
+            description=f'Cleared role blacklist',
+            color=0xFF5959
+        )
+        await ctx.send(embed=embed)
+
+    @blacklist_clear.command(name='all')
+    async def blacklist_clear_all(self, ctx):
+        ignored_users_empty = False if config_data['ignored_users'] else True
+        ignored_roles_empty = False if config_data['ignored_roles'] else True
+        if ignored_users_empty and ignored_roles_empty:
+            embed = discord.Embed(
+                description='Both blacklists are already empty',
+                color=0xFFE900
+            )
+            await ctx.send(embed=embed)
+            return
+        if not ignored_users_empty:
+            config_data['ignored_users'].clear()
+            save()  # Save changes to file
+        if not ignored_roles_empty:
+            config_data['ignored_roles'].clear()
+            save()
+        embed = discord.Embed(
+            description=f'Cleared blacklists',
             color=0xFF5959
         )
         await ctx.send(embed=embed)

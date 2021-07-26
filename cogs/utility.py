@@ -102,6 +102,12 @@ class Utility(commands.Cog):
                                                                   '- r\n'
                                                                   '**\\>> roleid**\n'
                                                                   '- rid')
+        embed.add_field(name='blacklist clear', inline=True, value='**\\>> users**\n'
+                                                                   '- user\n'
+                                                                   '- u\n'
+                                                                   '**\\>> roles**\n'
+                                                                   '- role\n'
+                                                                   '- r\n')
         await ctx.send(embed=embed)
 
     @commands.command(aliases=['h'])
@@ -321,9 +327,9 @@ def get_help_dict(module=None):
             },
         'blacklist clear':
             {
-                'title': 'blacklist clear',
-                'description': 'Clears the reaction log ignore list',
-                'example': 'blacklist clear',
+                'title': 'blacklist clear <users/roles/all>',
+                'description': 'Clears corresponding reaction log ignore list',
+                'example': 'blacklist clear all',
                 'alias': []
             },
     }
