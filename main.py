@@ -57,8 +57,16 @@ for filename in os.listdir('./cogs'):
         bot.load_extension(f'cogs.{filename[:-3]}')
 
 token = console_interaction.get_bot_token()
+
 try:
     bot.run(token)
 except discord.LoginFailure:
-    print('Login failed. Is the token valid?')
-    input()  # Pause before exiting
+    print('Login failed. Is the token valid?', end='\n\n')
+    if console_interaction.get_console_confirmation('Should I overwrite the token?'):
+        print()  # Newline
+        with open('token.json', 'w') as file:
+            token = console_interaction.write_token(file)
+        print('Token updated. Restart application to retry')
+        input()  # Pause to show message
+    else:
+        quit()
