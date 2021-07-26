@@ -3,6 +3,12 @@ from discord.ext import commands
 import os
 import console_interaction
 
+# Process of adding new commands:
+# 1. Create in cog
+# 2. Document in utility.py
+# 3. Document aliases in utility.py alias command
+# Can alternatively go by discord.py's built-in commands for description/aliases/etc.
+
 
 intents = discord.Intents.default()
 intents.members = True

@@ -22,8 +22,9 @@ if not os.path.isfile('config.json'):  # If config doesn't exist, create a fresh
             'remove_reaction_log_enabled': True,
             'remove_reaction_log_id': None,
             'blacklist_enabled': True,
-            'ignored_users': []  # Using list instead of set due to JSON serialization. Could make custom encoding
+            'ignored_users': [],  # Using list instead of set due to JSON serialization. Could make custom encoding
             # for theoretical better performance
+            'ignored_roles': []
         }
         json.dump(template_config, config_json, indent=4)
 
@@ -65,8 +66,13 @@ class Reactions(commands.Cog):
         server = self.bot.get_guild(payload.guild_id)
         user = server.get_member(payload.user_id)
         if config_data['blacklist_enabled']:
+            ignored_roles_set = set(config_data['ignored_roles'])
+            member_roles_set = {x.id for x in user.roles}
+            if not member_roles_set.isdisjoint(ignored_roles_set):  # Check if sets have any mutual values
+                # print(f'{user} has a blacklisted role, ignoring event')
+                return
             if user.id in config_data['ignored_users']:
-                # print(f'{user} is blacklisted, ignoring added reaction')
+                # print(f'{user} is blacklisted, ignoring event')
                 return
         message_link = f'https://discord.com/channels/{payload.guild_id}/{payload.channel_id}/{payload.message_id}'
         emoji = payload.emoji
@@ -105,8 +111,13 @@ class Reactions(commands.Cog):
         server = self.bot.get_guild(payload.guild_id)
         user = server.get_member(payload.user_id)
         if config_data['blacklist_enabled']:
+            ignored_roles_set = set(config_data['ignored_roles'])
+            member_roles_set = {x.id for x in user.roles}
+            if not member_roles_set.isdisjoint(ignored_roles_set):  # Check if sets have any mutual values
+                # print(f'{user} has a blacklisted role, ignoring event')
+                return
             if user.id in config_data['ignored_users']:
-                # print(f'{user} is blacklisted, ignoring added reaction')
+                # print(f'{user} is blacklisted, ignoring event')
                 return
         message_link = f'https://discord.com/channels/{payload.guild_id}/{payload.channel_id}/{payload.message_id}'
         emoji = payload.emoji
@@ -336,7 +347,8 @@ class Reactions(commands.Cog):
 
         # Get blacklist statuses
         blacklist_status = 'ON' if config_data['blacklist_enabled'] else 'OFF'  # Status string
-        blacklist_length = len(config_data['ignored_users'])
+        blacklisted_users_length = len(config_data['ignored_users'])
+        blacklisted_roles_length = len(config_data['ignored_roles'])
 
         embed = discord.Embed(
             title='Reaction Log Status',
@@ -345,22 +357,26 @@ class Reactions(commands.Cog):
                         f'Remove log: **{removelog_status}**\n'
                         f'Remove log channel: {removelog_channel_text}\n\n'
                         f'Blacklist: **{blacklist_status}**\n'
-                        f'Blacklisted users: **{blacklist_length}**'
+                        f'Blacklisted users: **{blacklisted_users_length}**\n'
+                        f'Blacklisted roles: **{blacklisted_roles_length}**\n'
         )
         await ctx.send(embed=embed)
 
     @commands.group(aliases=['bl', 'b'], invoke_without_command=True)
     async def blacklist(self, ctx):
         status = 'ON' if config_data['blacklist_enabled'] else 'OFF'  # Status string
-        blacklist_length = len(config_data['ignored_users'])
+        blacklisted_users_length = len(config_data['ignored_users'])
+        blacklisted_roles_length = len(config_data['ignored_roles'])
         embed = discord.Embed(
             description=f'(Blacklist is currently **{status}**)\n'
-                        f'(Blacklisted users: **{blacklist_length}**)\n\n'
+                        f'(Blacklisted users: **{blacklisted_users_length}**)\n'
+                        f'(Blacklisted roles: **{blacklisted_roles_length}**)\n\n'
                         f'**Usage:**\n'
                         f'.blacklist add <user id/mention>\n'
+                        f'.blacklist addrole <role id/mention>\n'
                         f'.blacklist remove <user id/mention>\n'
-                        f'.blacklist list\n'
-                        f'.blacklist listid'
+                        f'.blacklist removerole <role id/mention>\n'
+                        f'.blacklist list <users/userid/roles/roleid>'
         )
         await ctx.send(embed=embed)
 
@@ -399,23 +415,87 @@ class Reactions(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-    @blacklist.command(name='list', aliases=['l'])
-    async def blacklist_list(self, ctx):
-        ignored_users_mentions = [f'<@{x}>' for x in config_data['ignored_users']]
-        title = 'Blacklisted Users' if ignored_users_mentions else 'There are no blacklisted users'
+    @blacklist.command(name='addrole', aliases=['ar'])
+    async def blacklist_addrole(self, ctx, role: discord.Role):
+        if role.id in config_data['ignored_roles']:
+            embed = discord.Embed(
+                description=f'<@&{role.id}> is already blacklisted',
+                color=0xFFE900
+            )
+            await ctx.send(embed=embed)
+            return
+        config_data['ignored_roles'].append(role.id)
+        config_data['ignored_roles'] = sorted(config_data['ignored_roles'])  # Sort by role id
+        save()  # Save changes to file
         embed = discord.Embed(
-            title=title,
-            description='\n'.join(ignored_users_mentions)
+            description=f'Blacklisted <@&{role.id}>',
+            color=0x60FF7D
         )
         await ctx.send(embed=embed)
 
-    @blacklist.command(name='listid', aliases=['id'])
-    async def blacklist_listid(self, ctx):
-        ignored_users_strings = [str(x) for x in config_data['ignored_users']]
-        title = 'Blacklisted Users (ID)' if ignored_users_strings else 'There are no blacklisted users'
+    @blacklist.command(name='removerole', aliases=['rr'])
+    async def blacklist_removerole(self, ctx, role: discord.Role):
+        if role.id not in config_data['ignored_roles']:
+            embed = discord.Embed(
+                description=f'<@&{role.id}> is not blacklisted',
+                color=0xFFE900
+            )
+            await ctx.send(embed=embed)
+            return
+        config_data['ignored_roles'].remove(role.id)
+        save()  # Save changes to file
+        embed = discord.Embed(
+            description=f'Removed <@&{role.id}> from blacklist',
+            color=0xFF5959
+        )
+        await ctx.send(embed=embed)
+
+    @blacklist.group(name='list', aliases=['l'], invoke_without_command=True)
+    async def blacklist_list(self, ctx):
+        embed = discord.Embed(
+            description=f'**Valid lists:** users, userid, roles, roleid',
+            color=0xFFE900
+        )
+        await ctx.send(embed=embed)
+        return
+
+    @blacklist_list.command(name='users', aliases=['user', 'u'])
+    async def blacklist_list_users(self, ctx):
+        blacklist_mentions = [f'<@{x}>' for x in config_data['ignored_users']]
+        title = 'Blacklisted Users' if blacklist_mentions else 'There are no blacklisted users'
         embed = discord.Embed(
             title=title,
-            description='\n'.join(ignored_users_strings)
+            description='\n'.join(blacklist_mentions)
+        )
+        await ctx.send(embed=embed)
+
+    @blacklist_list.command(name='userid', aliases=['uid'])
+    async def blacklist_list_userid(self, ctx):
+        blacklist_ids = [str(x) for x in config_data['ignored_users']]
+        title = 'Blacklisted Users (ID)' if blacklist_ids else 'There are no blacklisted users'
+        embed = discord.Embed(
+            title=title,
+            description='\n'.join(blacklist_ids)
+        )
+        await ctx.send(embed=embed)
+
+    @blacklist_list.command(name='roles', aliases=['role', 'r'])
+    async def blacklist_list_roles(self, ctx):
+        blacklist_roles = [f'<@&{x}>' for x in config_data['ignored_roles']]
+        title = 'Blacklisted Roles' if blacklist_roles else 'There are no blacklisted roles'
+        embed = discord.Embed(
+            title=title,
+            description='\n'.join(blacklist_roles)
+        )
+        await ctx.send(embed=embed)
+
+    @blacklist_list.command(name='roleid', aliases=['rid'])
+    async def blacklist_list_roleid(self, ctx):
+        blacklist_roleids = [str(x) for x in config_data['ignored_roles']]
+        title = 'Blacklisted Roles (ID)' if blacklist_roleids else 'There are no blacklisted roles'
+        embed = discord.Embed(
+            title=title,
+            description='\n'.join(blacklist_roleids)
         )
         await ctx.send(embed=embed)
 

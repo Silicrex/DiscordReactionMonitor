@@ -33,6 +33,12 @@ class Utility(commands.Cog):
                 color=0xFFE900
             )
             await ctx.send(embed=embed)
+        elif isinstance(error, commands.RoleNotFound):
+            embed = discord.Embed(
+                title='Invalid role',
+                color=0xFFE900
+            )
+            await ctx.send(embed=embed)
         elif isinstance(error, commands.MissingRequiredArgument):
             msg = ctx.message.content
             command = str(self.bot.get_command(msg[1:]))  # Remove prefix, convert aliases to full command
@@ -61,18 +67,41 @@ class Utility(commands.Cog):
     @commands.command()
     async def alias(self, ctx):
         embed = discord.Embed(
-            title='Command aliases'
+            title='Command aliases',
+            description='**\\> = subcommand level**'
         )
-        embed.add_field(name='addlog', value='add, a', inline=False)
-        embed.add_field(name='addlog set', value='addlog s', inline=False)
-        embed.add_field(name='removelog', value='remove, r', inline=False)
-        embed.add_field(name='removelog set', value='removelog s', inline=False)
-        embed.add_field(name='status', value='s', inline=False)
-        embed.add_field(name='blacklist', value='bl, b', inline=False)
-        embed.add_field(name='blacklist add', value='blacklist a', inline=False)
-        embed.add_field(name='blacklist remove', value='blacklist r', inline=False)
-        embed.add_field(name='blacklist list', value='blacklist l', inline=False)
-        embed.add_field(name='blacklist listid', value='blacklist id', inline=False)
+        embed.add_field(name='help', inline=True, value='- h')
+        embed.add_field(name='addlog', inline=True, value='- add\n'
+                                                          '- a\n'
+                                                          '**\\> set**\n'
+                                                          '- s')
+        embed.add_field(name='removelog', inline=True, value='- remove\r'
+                                                             '- r\n'
+                                                             '**\\> set**\n'
+                                                             '- s')
+        embed.add_field(name='status', inline=True, value='- s')
+        embed.add_field(name='blacklist', inline=True, value='- bl\n'
+                                                             '- b\n'
+                                                             '**\\> add**\n'
+                                                             '- a\n'
+                                                             '**\\> addrole**\n'
+                                                             '- ar\n'
+                                                             '**\\> remove**\n'
+                                                             '- r\n'
+                                                             '**\\> removerole**\n'
+                                                             '- rr\n'
+                                                             '**\\> list**\n'
+                                                             '- l')
+        embed.add_field(name='blacklist list', inline=True, value='**\\>> users**\n'
+                                                                  '- user\n'
+                                                                  '- u\n'
+                                                                  '**\\>> userid**\n'
+                                                                  '- uid\n'
+                                                                  '**\\>> roles**\n'
+                                                                  '- role\n'
+                                                                  '- r\n'
+                                                                  '**\\>> roleid**\n'
+                                                                  '- rid')
         await ctx.send(embed=embed)
 
     @commands.command(aliases=['h'])
@@ -101,9 +130,9 @@ def setup(bot):
 def get_general_help_embed():
     embed = discord.Embed(
         title='Bot Commands',
-        description='<> = Parameter\n'
-                    '() = optional\n'
-                    '/ = pick between'
+        description='**<> = Parameter**\n'
+                    '**() = optional**\n'
+                    '**/ = pick between**'
     )
 
     utility_module = get_help_dict('utility')
@@ -187,7 +216,7 @@ def get_help_dict(module=None):
             },
         'blacklist':
             {
-                'title': 'blacklist (add/remove/clear/list/listid)',
+                'title': 'blacklist (add/addrole/remove/removerole/clear/list)',
                 'description': 'Shows blacklist (reaction log ignore list) help/settings; or manages blacklist',
                 'example': 'blacklist',
                 'alias': ['bl', 'b']
@@ -262,6 +291,13 @@ def get_help_dict(module=None):
                 'example': 'blacklist add @Somebody',
                 'alias': ['a']
             },
+        'blacklist addrole':
+            {
+                'title': 'blacklist addrole <role ID/mention>',
+                'description': 'Adds role to reaction log ignore list; takes ID or mention',
+                'example': 'blacklist addrole @Moderator',
+                'alias': ['ar']
+            },
         'blacklist remove':
             {
                 'title': 'blacklist remove <user ID/mention>',
@@ -269,19 +305,19 @@ def get_help_dict(module=None):
                 'example': 'blacklist remove @Somebody',
                 'alias': ['r']
             },
+        'blacklist removerole':
+            {
+                'title': 'blacklist removerole <role ID/mention>',
+                'description': 'Removes role from reaction log ignore list; takes ID or mention',
+                'example': 'blacklist removerole @Member',
+                'alias': ['rr']
+            },
         'blacklist list':
             {
-                'title': 'blacklist list',
-                'description': 'Displays reaction log ignore list via embed mentions',
-                'example': 'blacklist list',
+                'title': 'blacklist list <users/userid/roles/roleid>',
+                'description': 'Displays embed blacklist of user mentions/user ids/role mentions/role ids',
+                'example': 'blacklist list users',
                 'alias': ['l']
-            },
-        'blacklist listid':
-            {
-                'title': 'blacklist listid',
-                'description': 'Displays reaction log ignore list via user IDs',
-                'example': 'blacklist listid',
-                'alias': ['id']
             },
         'blacklist clear':
             {
