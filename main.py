@@ -33,14 +33,14 @@ async def globally_block_dms(ctx):  # Bot should not be usable in DMs
 
 @bot.command()
 @commands.is_owner()  # Owner-only command
-async def load(ctx, extension):  # Loading a cog from a Python file
+async def load(ctx, extension):  # Loading a cog from a Python file; input is file name without file extension
     bot.load_extension(f'cogs.{extension}')
     await ctx.send(f'Loaded {extension}')
 
 
 @bot.command()
 @commands.is_owner()  # Owner-only command
-async def unload(ctx, extension):  # Unloading a cog from a Python file
+async def unload(ctx, extension):  # Unloading a cog from a Python file; input is file name without file extension
     bot.unload_extension(f'cogs.{extension}')
     await ctx.send(f'Unloaded {extension}')
 
