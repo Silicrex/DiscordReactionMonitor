@@ -51,8 +51,10 @@ class Reactions(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    # ---------------------------------------- REACTIONS ADDED ----------------------------------------
+
     @commands.Cog.listener()
-    async def on_raw_reaction_add(self, payload):
+    async def on_raw_reaction_add(self, payload):  # Track Reactions added
         if config_data['stat_tracking_enabled']:
             config_data['reactions_added'] += 1
             save()
@@ -99,64 +101,10 @@ class Reactions(commands.Cog):
         embed.add_field(name='Message link', value=f'[Jump to message!]({message_link})', inline=False)
         await add_log_channel.send(embed=embed)
 
-    @commands.Cog.listener()
-    async def on_raw_reaction_remove(self, payload):
-        if config_data['stat_tracking_enabled']:
-            config_data['reactions_removed'] += 1
-            save()
-        if not config_data['remove_reaction_log_enabled']:
-            # print('Reaction remove log has been disabled, ignoring event')
-            return
-        remove_log_channel = self.bot.get_channel(config_data['remove_reaction_log_id'])
-        if not remove_log_channel:
-            if config_data['remove_reaction_log_id'] is None:
-                print("[ERROR] Remove log has not been set, ignoring reaction event\n"
-                      ">>> You can set the log with '.removelog <channel id/mention>', or manually in config.json\n"
-                      ">>> If done manually; replace 'None' with the channel id, "
-                      "and make sure you leave the comma after")
-            else:
-                print('ERROR: Invalid reaction remove channel id')
-            return
-
-        server = self.bot.get_guild(payload.guild_id)
-        user = server.get_member(payload.user_id)
-        if config_data['blacklist_enabled']:
-            ignored_roles_set = set(config_data['ignored_roles'])
-            member_roles_set = {x.id for x in user.roles}
-            if not member_roles_set.isdisjoint(ignored_roles_set):  # Check if sets have any mutual values
-                # print(f'{user} has a blacklisted role, ignoring event')
-                return
-            if user.id in config_data['ignored_users']:
-                # print(f'{user} is blacklisted, ignoring event')
-                return
-        message_link = f'https://discord.com/channels/{payload.guild_id}/{payload.channel_id}/{payload.message_id}'
-        emoji = payload.emoji
-
-        embed = discord.Embed(
-            title=f'Reaction Deleted',
-            description=f'{emoji}',
-            color=0xEF1C1C
-        )
-
-        if emoji.is_custom_emoji():
-            emoji_url = str(emoji.url)[:-3] + 'gif'
-            async with aiohttp.ClientSession() as session:
-                async with session.get(emoji_url) as request:
-                    if request.status == 200:
-                        embed.set_thumbnail(url=emoji_url)
-                    else:
-                        embed.set_thumbnail(url=emoji.url)
-
-        embed.set_author(name=f'{user.name}#{user.discriminator}', icon_url=user.avatar_url)
-        embed.add_field(name=f'By', value=f'{user.mention}')
-        embed.add_field(name=f'In channel', value=f'<#{payload.channel_id}>', inline=True)
-        embed.add_field(name='Message link', value=f'[Jump to message!]({message_link})', inline=False)
-        await remove_log_channel.send(embed=embed)
-
     @commands.group(aliases=['a', 'add'], invoke_without_command=True)
     async def addlog(self, ctx):
         status = 'ON' if config_data['add_reaction_log_enabled'] else 'OFF'  # Status string
-        log_id = config_data['add_reaction_log_id']
+        log_id = config_data['add_reaction_log_id']  # Channel id
         if log_id is None:  # Not set yet
             log_text = '**Not set**'
         else:
@@ -243,6 +191,62 @@ class Reactions(commands.Cog):
             color=0xFF5959
         )
         await ctx.send(embed=embed)
+
+    # ---------------------------------------- REACTIONS REMOVED ----------------------------------------
+
+    @commands.Cog.listener()
+    async def on_raw_reaction_remove(self, payload):  # Track Reactions removed
+        if config_data['stat_tracking_enabled']:
+            config_data['reactions_removed'] += 1
+            save()
+        if not config_data['remove_reaction_log_enabled']:
+            # print('Reaction remove log has been disabled, ignoring event')
+            return
+        remove_log_channel = self.bot.get_channel(config_data['remove_reaction_log_id'])
+        if not remove_log_channel:
+            if config_data['remove_reaction_log_id'] is None:
+                print("[ERROR] Remove log has not been set, ignoring reaction event\n"
+                      ">>> You can set the log with '.removelog <channel id/mention>', or manually in config.json\n"
+                      ">>> If done manually; replace 'None' with the channel id, "
+                      "and make sure you leave the comma after")
+            else:
+                print('ERROR: Invalid reaction remove channel id')
+            return
+
+        server = self.bot.get_guild(payload.guild_id)
+        user = server.get_member(payload.user_id)
+        if config_data['blacklist_enabled']:
+            ignored_roles_set = set(config_data['ignored_roles'])
+            member_roles_set = {x.id for x in user.roles}
+            if not member_roles_set.isdisjoint(ignored_roles_set):  # Check if sets have any mutual values
+                # print(f'{user} has a blacklisted role, ignoring event')
+                return
+            if user.id in config_data['ignored_users']:
+                # print(f'{user} is blacklisted, ignoring event')
+                return
+        message_link = f'https://discord.com/channels/{payload.guild_id}/{payload.channel_id}/{payload.message_id}'
+        emoji = payload.emoji
+
+        embed = discord.Embed(
+            title=f'Reaction Deleted',
+            description=f'{emoji}',
+            color=0xEF1C1C
+        )
+
+        if emoji.is_custom_emoji():
+            emoji_url = str(emoji.url)[:-3] + 'gif'
+            async with aiohttp.ClientSession() as session:
+                async with session.get(emoji_url) as request:
+                    if request.status == 200:
+                        embed.set_thumbnail(url=emoji_url)
+                    else:
+                        embed.set_thumbnail(url=emoji.url)
+
+        embed.set_author(name=f'{user.name}#{user.discriminator}', icon_url=user.avatar_url)
+        embed.add_field(name=f'By', value=f'{user.mention}')
+        embed.add_field(name=f'In channel', value=f'<#{payload.channel_id}>', inline=True)
+        embed.add_field(name='Message link', value=f'[Jump to message!]({message_link})', inline=False)
+        await remove_log_channel.send(embed=embed)
 
     @commands.group(aliases=['r', 'remove'], invoke_without_command=True)
     async def removelog(self, ctx):
@@ -335,46 +339,7 @@ class Reactions(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-    @commands.command(aliases=['s'])
-    async def status(self, ctx):
-        # Get add log statuses
-        addlog_status = 'ON' if config_data['add_reaction_log_enabled'] else 'OFF'  # Status string
-        addlog_id = config_data['add_reaction_log_id']
-        if addlog_id is None:  # Not set yet
-            addlog_channel_text = '**Not set**'
-        else:
-            addlog_channel = self.bot.get_channel(addlog_id)
-            addlog_channel_text = f'<#{addlog_id}>' if addlog_channel else '**(Invalid channel)**'
-
-        # Get remove log statuses
-        removelog_status = 'ON' if config_data['remove_reaction_log_enabled'] else 'OFF'  # Status string
-        removelog_id = config_data['remove_reaction_log_id']
-        if removelog_id is None:  # Not set yet
-            removelog_channel_text = '**Not set**'
-        else:
-            removelog_channel = self.bot.get_channel(removelog_id)
-            removelog_channel_text = f'<#{removelog_id}>' if removelog_channel else '**(Invalid channel)**'
-
-        # Get blacklist statuses
-        blacklist_status = 'ON' if config_data['blacklist_enabled'] else 'OFF'  # Status string
-        blacklisted_users_length = len(config_data['ignored_users'])
-        blacklisted_roles_length = len(config_data['ignored_roles'])
-
-        # Get stats statuses
-        stats_status = 'ON' if config_data['stat_tracking_enabled'] else 'OFF'  # Status string
-
-        embed = discord.Embed(
-            title='Reaction Log Status',
-            description=f'Add log: **{addlog_status}**\n'
-                        f'Add log channel: {addlog_channel_text}\n\n'
-                        f'Remove log: **{removelog_status}**\n'
-                        f'Remove log channel: {removelog_channel_text}\n\n'
-                        f'Blacklist: **{blacklist_status}**\n'
-                        f'Blacklisted users: **{blacklisted_users_length}**\n'
-                        f'Blacklisted roles: **{blacklisted_roles_length}**\n\n'
-                        f'Total reactions stats tracking: **{stats_status}**'
-        )
-        await ctx.send(embed=embed)
+    # ---------------------------------------- BLACKLIST ----------------------------------------
 
     @commands.group(aliases=['bl', 'b'], invoke_without_command=True)
     async def blacklist(self, ctx):
@@ -613,6 +578,49 @@ class Reactions(commands.Cog):
         )
         await ctx.send(embed=embed)
 
+    # ---------------------------------------- STATUS, STATS ----------------------------------------
+
+    @commands.command(aliases=['s'])
+    async def status(self, ctx):
+        # Get add log statuses
+        addlog_status = 'ON' if config_data['add_reaction_log_enabled'] else 'OFF'  # Status string
+        addlog_id = config_data['add_reaction_log_id']
+        if addlog_id is None:  # Not set yet
+            addlog_channel_text = '**Not set**'
+        else:
+            addlog_channel = self.bot.get_channel(addlog_id)
+            addlog_channel_text = f'<#{addlog_id}>' if addlog_channel else '**(Invalid channel)**'
+
+        # Get remove log statuses
+        removelog_status = 'ON' if config_data['remove_reaction_log_enabled'] else 'OFF'  # Status string
+        removelog_id = config_data['remove_reaction_log_id']
+        if removelog_id is None:  # Not set yet
+            removelog_channel_text = '**Not set**'
+        else:
+            removelog_channel = self.bot.get_channel(removelog_id)
+            removelog_channel_text = f'<#{removelog_id}>' if removelog_channel else '**(Invalid channel)**'
+
+        # Get blacklist statuses
+        blacklist_status = 'ON' if config_data['blacklist_enabled'] else 'OFF'  # Status string
+        blacklisted_users_length = len(config_data['ignored_users'])
+        blacklisted_roles_length = len(config_data['ignored_roles'])
+
+        # Get stats statuses
+        stats_status = 'ON' if config_data['stat_tracking_enabled'] else 'OFF'  # Status string
+
+        embed = discord.Embed(
+            title='Reaction Log Status',
+            description=f'Add log: **{addlog_status}**\n'
+                        f'Add log channel: {addlog_channel_text}\n\n'
+                        f'Remove log: **{removelog_status}**\n'
+                        f'Remove log channel: {removelog_channel_text}\n\n'
+                        f'Blacklist: **{blacklist_status}**\n'
+                        f'Blacklisted users: **{blacklisted_users_length}**\n'
+                        f'Blacklisted roles: **{blacklisted_roles_length}**\n\n'
+                        f'Total reactions stats tracking: **{stats_status}**'
+        )
+        await ctx.send(embed=embed)
+
     @commands.group(invoke_without_command=True)
     async def stats(self, ctx):
         status = 'ON' if config_data['stat_tracking_enabled'] else 'OFF'  # Status string
@@ -671,7 +679,8 @@ class Reactions(commands.Cog):
             description=f"Reactions added: **{config_data['reactions_added']}**\n"
                         f"Reactions removed: **{config_data['reactions_removed']}**\n\n"
                         f"**WARNING: this will reset tracked total reactions stats**\n"
-                        f"**Continue? (y/n)**",
+                        f"**Continue? (y/n)**\n"
+                        f"* 10s timeout",
             color=0x60FF7D
         )
         await ctx.send(embed=embed)
@@ -714,5 +723,5 @@ class Reactions(commands.Cog):
             await ctx.send(embed=embed)
 
 
-def setup(bot):
+def setup(bot):  # For cog loading
     bot.add_cog(Reactions(bot))

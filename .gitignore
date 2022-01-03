@@ -1,3 +1,6 @@
 __pycache__
 token.json
 config.json
+.idea
+venv
+todo.txt

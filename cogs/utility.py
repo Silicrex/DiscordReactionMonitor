@@ -8,11 +8,11 @@ class Utility(commands.Cog):
         self.bot = bot
 
     @commands.Cog.listener()
-    async def on_ready(self):
+    async def on_ready(self):  # Message on successful launch
         print(f'{self.bot.user} ready')
 
     @commands.Cog.listener()
-    async def on_command_error(self, ctx, error):
+    async def on_command_error(self, ctx, error):  # Error handler
         if isinstance(error, commands.CommandNotFound):
             print(f'Invalid command by {ctx.author} in {ctx.channel}: {error.args[0]}')
         elif isinstance(error, commands.NoPrivateMessage):
@@ -45,7 +45,7 @@ class Utility(commands.Cog):
             help_dict = get_help_dict()
             embed = get_help_embed(help_dict, command)
             await ctx.send(embed=embed)
-        else:
+        else:  # Log to console
             print('- [Error]')
             print('Class:', error.__class__)
             print('Args:', error.args)
@@ -58,7 +58,7 @@ class Utility(commands.Cog):
             raise error
 
     @commands.command()
-    async def ping(self, ctx):
+    async def ping(self, ctx):  # Check latency
         start_time = time.monotonic()  # Start monotonic clock
         sent_message = await ctx.send('Pong!')  # Send message
         time_difference = time.monotonic() - start_time
@@ -130,7 +130,7 @@ class Utility(commands.Cog):
                 await ctx.send(embed=embed)
 
 
-def setup(bot):
+def setup(bot):  # For cog loading
     bot.add_cog(Utility(bot))
 
 
