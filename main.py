@@ -53,7 +53,7 @@ async def reload(ctx, extension):  # Reloading a cog from a Python file; easy up
 
 
 for filename in os.listdir('./cogs'):  # Load all cogs
-    if filename.endswith('.py'):
+    if filename.endswith('.py') and not filename.startswith('_'):  # If file starts with _ then ignore
         bot.load_extension(f'cogs.{filename[:-3]}')  # File extension not needed, remove ".py"
 
 token = console_interaction.get_bot_token()  # Load bot token
